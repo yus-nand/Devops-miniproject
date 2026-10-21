@@ -58,7 +58,7 @@
       <tbody>
         <c:forEach var="row" items="${rows}">
           <tr class="grievance-row${row.overdue ? ' overdue-row' : ''}">
-            <td class="col-ref"><c:out value="${row.grievance.refNo}"/></td>
+            <td class="col-ref"><a class="ref-link" href="${pageContext.request.contextPath}/grievances/view?id=${row.grievance.id}"><c:out value="${row.grievance.refNo}"/></a></td>
             <td class="col-policy"><c:out value="${row.grievance.policyNumber}"/></td>
             <td class="col-category"><c:out value="${row.grievance.category.label}"/></td>
             <td class="col-title"><c:out value="${row.grievance.title}"/></td>

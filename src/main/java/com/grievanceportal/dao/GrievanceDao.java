@@ -230,4 +230,83 @@ public class GrievanceDao {
     private static String escapeLike(String text) {
         return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
     }
+
+    /**
+     * Assigns a Submitted, unassigned grievance to an officer and moves it to Under Review, and records
+     * the history row, in one transaction. Returns false when someone else got there first.
+     */
+    public boolean pickUp(long id, long officerId, LocalDateTime now) throws SQLException {
+        String update = "UPDATE grievances SET status = ?, assigned_officer_id = ? "
+                + "WHERE id = ? AND status = ? AND assigned_officer_id IS NULL";
+        try (Connection c = Database.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                int changed;
+                try (PreparedStatement ps = c.prepareStatement(update)) {
+                    ps.setString(1, Status.UNDER_REVIEW.name());
+                    ps.setLong(2, officerId);
+                    ps.setLong(3, id);
+                    ps.setString(4, Status.SUBMITTED.name());
+                    changed = ps.executeUpdate();
+                }
+                if (changed != 1) {
+                    c.rollback();
+                    return false;
+                }
+                insertHistory(c, id, Status.SUBMITTED, Status.UNDER_REVIEW, officerId, null, now);
+                c.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                c.rollback();
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Moves a grievance from one status to another and records the history row, in one transaction.
+     * It only happens while the grievance is still in the status the caller saw; otherwise it returns false.
+     */
+    public boolean changeStatus(long id, Status from, Status to, String resolutionNote, long changedBy,
+            String historyNote, LocalDateTime now) throws SQLException {
+        String update = "UPDATE grievances SET status = ?, resolution_note = ? WHERE id = ? AND status = ?";
+        try (Connection c = Database.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                int changed;
+                try (PreparedStatement ps = c.prepareStatement(update)) {
+                    ps.setString(1, to.name());
+                    ps.setString(2, resolutionNote);
+                    ps.setLong(3, id);
+                    ps.setString(4, from.name());
+                    changed = ps.executeUpdate();
+                }
+                if (changed != 1) {
+                    c.rollback();
+                    return false;
+                }
+                insertHistory(c, id, from, to, changedBy, historyNote, now);
+                c.commit();
+                return true;
+            } catch (SQLException | RuntimeException e) {
+                c.rollback();
+                throw e;
+            }
+        }
+    }
+
+    private static void insertHistory(Connection c, long grievanceId, Status from, Status to, long changedBy,
+            String note, LocalDateTime now) throws SQLException {
+        String sql = "INSERT INTO status_history (grievance_id, from_status, to_status, changed_by, note, "
+                + "changed_at) VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, grievanceId);
+            ps.setString(2, from.name());
+            ps.setString(3, to.name());
+            ps.setLong(4, changedBy);
+            ps.setString(5, note);
+            ps.setTimestamp(6, Timestamp.valueOf(now));
+            ps.executeUpdate();
+        }
+    }
 }
