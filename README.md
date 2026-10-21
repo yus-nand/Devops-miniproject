@@ -6,7 +6,7 @@ A small Java web application for recording and tracking insurance grievances. Po
 
 The application is built in sprints. The backlog and plan are in `docs/02-agile-plan.md`.
 
-Sprint 1 is implemented: login and logout with three roles, submitting a grievance, the policyholder's own list, a health endpoint and demo data.
+Version 1.0.0 is the complete MVP: all 15 user stories (US-01 to US-15) are implemented and tested. Policyholders submit, edit and track grievances. Officers and admins list, search and filter every grievance, see Overdue flags and follow the status workflow. Admins close or reopen grievances and see a summary dashboard.
 
 ## Technology
 
