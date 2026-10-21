@@ -1,5 +1,6 @@
 package com.grievanceportal;
 
+import com.grievanceportal.service.SampleData;
 import com.grievanceportal.util.AppConfig;
 import com.grievanceportal.util.Schema;
 import com.grievanceportal.util.Seeder;
@@ -17,6 +18,7 @@ public class AppInitListener implements ServletContextListener {
         try {
             Schema.init();
             Seeder.seedUsers();
+            SampleData.seed();
             event.getServletContext().log("Database ready: " + AppConfig.dbUrl());
         } catch (SQLException e) {
             throw new IllegalStateException("Database initialisation failed", e);
