@@ -7,6 +7,12 @@
 <c:if test="${param.saved == '1'}">
   <p class="notice" id="saved-message">Your changes were saved.</p>
 </c:if>
+<c:if test="${param.updated == '1'}">
+  <p class="notice" id="updated-message">The status was updated.</p>
+</c:if>
+<c:if test="${not empty actionError}">
+  <p class="error" id="action-error" role="alert"><c:out value="${actionError}"/></p>
+</c:if>
 <dl class="summary">
   <dt>Status</dt>
   <dd id="status"><c:out value="${g.status.label}"/></dd>
@@ -21,7 +27,8 @@
   <dt>Submitted on</dt>
   <dd id="created-on"><c:out value="${g.createdOn}"/></dd>
   <dt>Due date</dt>
-  <dd id="due-date"><c:out value="${g.dueOn}"/></dd>
+  <dd id="due-date"><c:out value="${g.dueOn}"/>
+    <c:if test="${overdue}"><span class="badge-overdue" id="overdue-flag">Overdue</span></c:if></dd>
   <dt>Assigned officer</dt>
   <dd id="assigned-officer"><c:out value="${empty detail.officerName ? 'Not assigned yet' : detail.officerName}"/></dd>
   <dt>Description</dt>
@@ -31,6 +38,37 @@
     <dd id="resolution-note" class="prose"><c:out value="${g.resolutionNote}"/></dd>
   </c:if>
 </dl>
+
+<c:if test="${actions.any}">
+  <section class="actions" id="actions">
+    <h2>Actions</h2>
+    <c:if test="${actions.canPickUp}">
+      <form method="post" action="${pageContext.request.contextPath}/grievances/pickup" id="pickup-form">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <input type="hidden" name="id" value="${g.id}">
+        <button type="submit" id="pickup-button">Pick up this grievance</button>
+      </form>
+    </c:if>
+    <c:if test="${not empty actions.noteMoves}">
+      <form method="post" action="${pageContext.request.contextPath}/grievances/status" id="note-form" novalidate>
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <input type="hidden" name="id" value="${g.id}">
+        <label for="note"><c:out value="${actions.noteLabel}"/></label>
+        <textarea id="note" name="note" rows="4" maxlength="1000"><c:out value="${noteText}"/></textarea>
+        <c:forEach var="m" items="${actions.noteMoves}">
+          <button type="submit" name="to" value="${m.to.code}" id="move-${m.to.code}"><c:out value="${m.label}"/></button>
+        </c:forEach>
+      </form>
+    </c:if>
+    <c:forEach var="m" items="${actions.plainMoves}">
+      <form method="post" action="${pageContext.request.contextPath}/grievances/status">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <input type="hidden" name="id" value="${g.id}">
+        <button type="submit" name="to" value="${m.to.code}" id="move-${m.to.code}"><c:out value="${m.label}"/></button>
+      </form>
+    </c:forEach>
+  </section>
+</c:if>
 
 <h2>Status history</h2>
 <table class="grid" id="history-table">
@@ -63,7 +101,7 @@
     <a id="back-to-list" href="${pageContext.request.contextPath}/grievances/mine">Back to my grievances</a>
   </c:if>
   <c:if test="${not sessionScope.user.policyholder}">
-    <a id="back-home" href="${pageContext.request.contextPath}/home">Back to home</a>
+    <a id="back-to-queue" href="${pageContext.request.contextPath}/grievances">Back to all grievances</a>
   </c:if>
 </p>
 <%@ include file="_footer.jspf" %>

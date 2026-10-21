@@ -27,3 +27,5 @@ form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border:
 .overdue-row td { background: #fff5f5; }
 .grid .col-ref, .grid .col-due { white-space: nowrap; }
 .prose { white-space: pre-wrap; }
+.actions form { margin: 12px 0; }
+.actions button + button { margin-left: 8px; }
