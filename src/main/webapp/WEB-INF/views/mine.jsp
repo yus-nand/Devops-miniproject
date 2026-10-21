@@ -21,7 +21,7 @@
       <tbody>
         <c:forEach var="g" items="${grievances}">
           <tr class="grievance-row">
-            <td class="col-ref"><c:out value="${g.refNo}"/></td>
+            <td class="col-ref"><a class="ref-link" href="${pageContext.request.contextPath}/grievances/view?id=${g.id}"><c:out value="${g.refNo}"/></a></td>
             <td class="col-category"><c:out value="${g.category.label}"/></td>
             <td class="col-title"><c:out value="${g.title}"/></td>
             <td class="col-status"><c:out value="${g.status.label}"/></td>

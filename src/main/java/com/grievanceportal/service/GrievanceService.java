@@ -3,6 +3,7 @@ package com.grievanceportal.service;
 import com.grievanceportal.dao.GrievanceDao;
 import com.grievanceportal.model.Category;
 import com.grievanceportal.model.Grievance;
+import com.grievanceportal.model.GrievanceDetail;
 import com.grievanceportal.model.GrievanceForm;
 import com.grievanceportal.model.Status;
 import com.grievanceportal.model.User;
@@ -76,6 +77,28 @@ public class GrievanceService {
     /** The grievances this user submitted, newest first. */
     public List<Grievance> listOwn(User user) throws SQLException {
         return dao.findByOwner(user.getId());
+    }
+
+    /**
+     * The detail view of one grievance. A policyholder gets it only for their own grievances,
+     * staff get it for any grievance. Anything else looks the same as a missing grievance.
+     */
+    public Optional<GrievanceDetail> findDetail(long id, User viewer) throws SQLException {
+        Optional<Grievance> found = dao.findById(id);
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        Grievance g = found.get();
+        boolean own = g.getPolicyholderId() == viewer.getId();
+        if (viewer.isPolicyholder() && !own) {
+            return Optional.empty();
+        }
+        String policyholderName = dao.fullNameOf(g.getPolicyholderId()).orElse("Unknown");
+        String officerName = g.getAssignedOfficerId() == null
+                ? null
+                : dao.fullNameOf(g.getAssignedOfficerId()).orElse(null);
+        boolean editable = viewer.isPolicyholder() && own && g.getStatus() == Status.SUBMITTED;
+        return Optional.of(new GrievanceDetail(g, dao.historyOf(id), policyholderName, officerName, editable));
     }
 
     /** Finds a grievance by reference number, only if it belongs to this user. */
