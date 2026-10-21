@@ -1,0 +1,40 @@
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:set var="pageTitle" value="Submit a grievance"/>
+<%@ include file="_header.jspf" %>
+<h1>Submit a grievance</h1>
+<form method="post" action="${pageContext.request.contextPath}/grievances/new" id="grievance-form" novalidate>
+  <input type="hidden" name="_csrf" value="${csrfToken}">
+
+  <label for="policyNumber">Policy number</label>
+  <input type="text" id="policyNumber" name="policyNumber" maxlength="30" value="<c:out value='${form.policyNumber}'/>">
+  <c:if test="${not empty errors.policyNumber}">
+    <p class="field-error" id="policyNumber-error"><c:out value="${errors.policyNumber}"/></p>
+  </c:if>
+
+  <label for="category">Category</label>
+  <select id="category" name="category">
+    <option value="">Choose a category</option>
+    <c:forEach var="cat" items="${categories}">
+      <option value="${cat.code}" ${form.category eq cat.code ? 'selected' : ''}><c:out value="${cat.label}"/></option>
+    </c:forEach>
+  </select>
+  <c:if test="${not empty errors.category}">
+    <p class="field-error" id="category-error"><c:out value="${errors.category}"/></p>
+  </c:if>
+
+  <label for="title">Title</label>
+  <input type="text" id="title" name="title" maxlength="150" value="<c:out value='${form.title}'/>">
+  <c:if test="${not empty errors.title}">
+    <p class="field-error" id="title-error"><c:out value="${errors.title}"/></p>
+  </c:if>
+
+  <label for="description">Description</label>
+  <textarea id="description" name="description" rows="6" maxlength="2000"><c:out value="${form.description}"/></textarea>
+  <c:if test="${not empty errors.description}">
+    <p class="field-error" id="description-error"><c:out value="${errors.description}"/></p>
+  </c:if>
+
+  <button type="submit" id="submit-grievance">Submit grievance</button>
+</form>
+<%@ include file="_footer.jspf" %>

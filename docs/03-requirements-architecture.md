@@ -143,7 +143,7 @@ Configuration (environment variables, with defaults):
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `GP_DB_PATH` | `./data/grievance-db` | Location of the H2 database file |
+| `GP_DB_PATH` | `${catalina.base}/data/grievance-db` under Tomcat, otherwise `./data/grievance-db` | Location of the H2 database file |
 | `GP_ENV_NAME` | `local` | Environment label shown in the page footer |
 
 ## 5. Technology stack (final)
