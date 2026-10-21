@@ -11,3 +11,8 @@ button { padding: 8px 16px; margin-top: 16px; border: 0; border-radius: 4px; bac
 .error { background: #fde8e8; color: #9b1c1c; padding: 8px 12px; border-radius: 4px; }
 .hint { color: #5b6573; font-size: 0.9rem; }
 footer { text-align: center; color: #5b6573; font-size: 0.85rem; padding: 24px 0; }
+form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border: 1px solid #b8c0cc; border-radius: 4px; font: inherit; }
+.field-error { color: #9b1c1c; margin: 4px 0 0; font-size: 0.9rem; }
+.summary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; }
+.summary dt { font-weight: 600; }
+.summary dd { margin: 0; }

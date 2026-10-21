@@ -34,4 +34,16 @@ public final class User implements Serializable {
     public Role getRole() {
         return role;
     }
+
+    public boolean isPolicyholder() {
+        return role == Role.POLICYHOLDER;
+    }
+
+    public boolean isOfficer() {
+        return role == Role.OFFICER;
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
 }
