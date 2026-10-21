@@ -48,6 +48,19 @@ copy target\grievance-portal.war <tomcat>\webapps\
 
 Then open http://localhost:8080/grievance-portal/ .
 
+## Continuous integration
+
+A Jenkins job named `grievance-portal-ci` builds the project automatically. It runs on the developer machine at http://localhost:8081 (Tomcat keeps port 8080).
+
+| Setting | Value |
+| --- | --- |
+| Source | this repository, branch `develop` |
+| Trigger | Poll SCM, `H/2 * * * *` (about every two minutes; a webhook needs a public address) |
+| Build | `mvn clean package` with JDK 21 and Maven 3.9 |
+| Result | `target/grievance-portal.war` is archived as the build artefact |
+
+Current Jenkins releases need Java 21 or newer to run. The project still targets Java 17, which a JDK 21 builds without changes.
+
 ## Demo accounts and configuration
 
 The first start creates these synthetic accounts and a few sample grievances. All of them share the password `demo123`. They are for local demos only.
