@@ -33,7 +33,7 @@ class SchemaTest {
                 Statement s = c.createStatement();
                 ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM users")) {
             rs.next();
-            assertEquals(4, rs.getInt(1));
+            assertEquals(5, rs.getInt(1));
         }
     }
 

@@ -20,6 +20,7 @@ public final class Seeder {
             addUser(c, "asha", "Asha Verma", Role.POLICYHOLDER);
             addUser(c, "ravi", "Ravi Kulkarni", Role.POLICYHOLDER);
             addUser(c, "officer1", "Meera Joshi", Role.OFFICER);
+            addUser(c, "officer2", "Kiran Nair", Role.OFFICER);
             addUser(c, "admin1", "Arjun Rao", Role.ADMIN);
         }
     }

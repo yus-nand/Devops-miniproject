@@ -56,6 +56,7 @@ The first start creates these synthetic accounts and a few sample grievances. Al
 | --- | --- |
 | `asha`, `ravi` | Policyholder |
 | `officer1` | Officer |
+| `officer2` | Officer (a second officer, to try picking up a grievance someone else already took) |
 | `admin1` | Admin |
 
 Seeding is safe to repeat: restarting the application does not duplicate users or sample grievances.
