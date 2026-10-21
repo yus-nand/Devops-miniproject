@@ -121,4 +121,45 @@ public class GrievanceDao {
         g.setDueOn(rs.getObject("due_on", LocalDate.class));
         return g;
     }
+
+    /**
+     * Grievances for the staff list, earliest due date first. The text matches part of the reference
+     * ID or policy number, ignoring case. A null or blank text, status or category does not restrict.
+     */
+    public List<Grievance> search(String text, Status status, Category category) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT " + COLUMNS + " FROM grievances WHERE 1 = 1");
+        List<String> values = new ArrayList<>();
+        if (text != null && !text.isBlank()) {
+            String pattern = "%" + escapeLike(text.trim().toUpperCase(Locale.ROOT)) + "%";
+            sql.append(" AND (UPPER(ref_no) LIKE ? ESCAPE '\\' OR UPPER(policy_number) LIKE ? ESCAPE '\\')");
+            values.add(pattern);
+            values.add(pattern);
+        }
+        if (status != null) {
+            sql.append(" AND status = ?");
+            values.add(status.name());
+        }
+        if (category != null) {
+            sql.append(" AND category = ?");
+            values.add(category.name());
+        }
+        sql.append(" ORDER BY due_on ASC, id ASC");
+
+        List<Grievance> result = new ArrayList<>();
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql.toString())) {
+            for (int i = 0; i < values.size(); i++) {
+                ps.setString(i + 1, values.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(map(rs));
+                }
+            }
+        }
+        return result;
+    }
+
+    private static String escapeLike(String text) {
+        return text.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+    }
 }
