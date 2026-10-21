@@ -1,12 +1,12 @@
 package com.grievanceportal.model;
 
-/** One line of the staff list: a grievance and whether it is past its due date. */
-public final class QueueRow {
+/** One line of a grievance list: the grievance and whether it is past its due date. */
+public final class GrievanceRow {
 
     private final Grievance grievance;
     private final boolean overdue;
 
-    public QueueRow(Grievance grievance, boolean overdue) {
+    public GrievanceRow(Grievance grievance, boolean overdue) {
         this.grievance = grievance;
         this.overdue = overdue;
     }

@@ -8,7 +8,7 @@ import com.grievanceportal.model.Category;
 import com.grievanceportal.model.Grievance;
 import com.grievanceportal.model.GrievanceForm;
 import com.grievanceportal.model.QueueFilter;
-import com.grievanceportal.model.QueueRow;
+import com.grievanceportal.model.GrievanceRow;
 import com.grievanceportal.model.Status;
 import com.grievanceportal.model.User;
 import com.grievanceportal.util.Database;
@@ -147,7 +147,7 @@ class StaffQueueTest {
 
     @Test
     void openGrievancePastItsDueDateIsOverdue() throws Exception {
-        QueueRow row = rowFor(claimOld);
+        GrievanceRow row = rowFor(claimOld);
         assertTrue(row.isOverdue());
     }
 
@@ -169,13 +169,13 @@ class StaffQueueTest {
             Grievance g = new Grievance();
             g.setStatus(status);
             g.setDueOn(LocalDate.of(2026, 1, 1));
-            assertFalse(StaffQueueService.isOverdue(g, longAfter), status + " must not be flagged");
+            assertFalse(Overdue.isOverdue(g, longAfter), status + " must not be flagged");
         }
         for (Status status : new Status[] {Status.SUBMITTED, Status.UNDER_REVIEW}) {
             Grievance g = new Grievance();
             g.setStatus(status);
             g.setDueOn(LocalDate.of(2026, 1, 1));
-            assertTrue(StaffQueueService.isOverdue(g, longAfter), status + " must be flagged");
+            assertTrue(Overdue.isOverdue(g, longAfter), status + " must be flagged");
         }
     }
 
@@ -194,7 +194,7 @@ class StaffQueueTest {
         assertEquals(Category.OTHER, QueueFilter.of("", "", "OTHER").getCategory());
     }
 
-    private QueueRow rowFor(Grievance g) throws Exception {
+    private GrievanceRow rowFor(Grievance g) throws Exception {
         return queue.queue(QueueFilter.NONE).stream()
                 .filter(row -> row.getGrievance().getId() == g.getId())
                 .findFirst()
