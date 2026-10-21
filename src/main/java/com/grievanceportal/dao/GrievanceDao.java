@@ -14,12 +14,17 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 public class GrievanceDao {
+
+    /** The statuses that count as open, as an SQL list. */
+    private static final String OPEN_STATUSES = "'" + Status.SUBMITTED.name() + "', '" + Status.UNDER_REVIEW.name() + "'";
 
     private static final String COLUMNS = "id, ref_no, policyholder_id, assigned_officer_id, policy_number, "
             + "category, title, description, status, resolution_note, created_on, due_on";
@@ -195,6 +200,12 @@ public class GrievanceDao {
      * ID or policy number, ignoring case. A null or blank text, status or category does not restrict.
      */
     public List<Grievance> search(String text, Status status, Category category) throws SQLException {
+        return search(text, status, category, null);
+    }
+
+    /** Like the search above. When overdueOn is given, only open grievances due before that day are returned. */
+    public List<Grievance> search(String text, Status status, Category category, LocalDate overdueOn)
+            throws SQLException {
         StringBuilder sql = new StringBuilder("SELECT " + COLUMNS + " FROM grievances WHERE 1 = 1");
         List<String> values = new ArrayList<>();
         if (text != null && !text.isBlank()) {
@@ -211,12 +222,19 @@ public class GrievanceDao {
             sql.append(" AND category = ?");
             values.add(category.name());
         }
+        if (overdueOn != null) {
+            sql.append(" AND status IN (" + OPEN_STATUSES + ") AND due_on < ?");
+        }
         sql.append(" ORDER BY due_on ASC, id ASC");
 
         List<Grievance> result = new ArrayList<>();
         try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql.toString())) {
-            for (int i = 0; i < values.size(); i++) {
-                ps.setString(i + 1, values.get(i));
+            int next = 1;
+            for (String value : values) {
+                ps.setString(next++, value);
+            }
+            if (overdueOn != null) {
+                ps.setObject(next, overdueOn);
             }
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -307,6 +325,45 @@ public class GrievanceDao {
             ps.setString(5, note);
             ps.setTimestamp(6, Timestamp.valueOf(now));
             ps.executeUpdate();
+        }
+    }
+
+    /** How many grievances are in each status. Statuses with none are left out. */
+    public Map<Status, Integer> countByStatus() throws SQLException {
+        Map<Status, Integer> counts = new LinkedHashMap<>();
+        try (Connection c = Database.getConnection();
+                PreparedStatement ps = c.prepareStatement("SELECT status, COUNT(*) FROM grievances GROUP BY status");
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                counts.put(Status.valueOf(rs.getString(1)), rs.getInt(2));
+            }
+        }
+        return counts;
+    }
+
+    /** How many grievances are in each category. Categories with none are left out. */
+    public Map<Category, Integer> countByCategory() throws SQLException {
+        Map<Category, Integer> counts = new LinkedHashMap<>();
+        try (Connection c = Database.getConnection();
+                PreparedStatement ps = c.prepareStatement(
+                        "SELECT category, COUNT(*) FROM grievances GROUP BY category");
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                counts.put(Category.valueOf(rs.getString(1)), rs.getInt(2));
+            }
+        }
+        return counts;
+    }
+
+    /** How many open grievances are due before the given day. */
+    public int countOverdue(LocalDate today) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM grievances WHERE status IN (" + OPEN_STATUSES + ") AND due_on < ?";
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setObject(1, today);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
+            }
         }
     }
 }

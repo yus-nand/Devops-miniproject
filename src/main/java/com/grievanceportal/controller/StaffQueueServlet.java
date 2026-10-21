@@ -22,7 +22,8 @@ public class StaffQueueServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         QueueFilter filter = QueueFilter.of(
-                request.getParameter("q"), request.getParameter("status"), request.getParameter("category"));
+                request.getParameter("q"), request.getParameter("status"), request.getParameter("category"),
+                "1".equals(request.getParameter("overdue")));
         try {
             request.setAttribute("rows", service.queue(filter));
         } catch (SQLException e) {

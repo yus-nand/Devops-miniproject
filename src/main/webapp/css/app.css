@@ -28,4 +28,11 @@ form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border:
 .grid .col-ref, .grid .col-due { white-space: nowrap; }
 .prose { white-space: pre-wrap; }
 .actions form { margin: 12px 0; }
+.tiles { display: flex; gap: 16px; margin: 12px 0; }
+.tile { flex: 1; background: #fff; border: 1px solid #dde2e8; border-radius: 4px; padding: 16px; display: flex; flex-direction: column; }
+.tile-label { color: #5b6573; font-size: 0.9rem; }
+.tile-number { font-size: 2rem; font-weight: 700; text-decoration: none; color: #1d3557; }
+.tile-alert .tile-number { color: #9b1c1c; }
+.grid .col-count { width: 6rem; }
+label.check { display: flex; gap: 8px; align-items: center; font-weight: 400; }
 .actions button + button { margin-left: 8px; }

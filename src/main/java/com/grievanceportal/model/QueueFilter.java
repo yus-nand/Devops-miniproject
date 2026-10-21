@@ -6,16 +6,18 @@ import java.util.Optional;
 public final class QueueFilter {
 
     /** A filter that matches every grievance. */
-    public static final QueueFilter NONE = new QueueFilter("", null, null);
+    public static final QueueFilter NONE = new QueueFilter("", null, null, false);
 
     private final String query;
     private final Status status;
     private final Category category;
+    private final boolean overdueOnly;
 
-    private QueueFilter(String query, Status status, Category category) {
+    private QueueFilter(String query, Status status, Category category, boolean overdueOnly) {
         this.query = query;
         this.status = status;
         this.category = category;
+        this.overdueOnly = overdueOnly;
     }
 
     /**
@@ -23,11 +25,17 @@ public final class QueueFilter {
      * and a status or category that does not exist is ignored instead of failing the page.
      */
     public static QueueFilter of(String query, String statusCode, String categoryCode) {
+        return of(query, statusCode, categoryCode, false);
+    }
+
+    /** Same as above, and when overdueOnly is true only open grievances past their due date match. */
+    public static QueueFilter of(String query, String statusCode, String categoryCode, boolean overdueOnly) {
         String text = query == null ? "" : query.trim();
         if (text.length() > 60) {
             text = text.substring(0, 60);
         }
-        return new QueueFilter(text, parseStatus(statusCode).orElse(null), Category.parse(categoryCode).orElse(null));
+        return new QueueFilter(text, parseStatus(statusCode).orElse(null), Category.parse(categoryCode).orElse(null),
+                overdueOnly);
     }
 
     private static Optional<Status> parseStatus(String code) {
@@ -64,8 +72,12 @@ public final class QueueFilter {
         return category == null ? "" : category.getCode();
     }
 
-    /** True when at least one of the three restrictions is set. */
+    public boolean isOverdueOnly() {
+        return overdueOnly;
+    }
+
+    /** True when at least one restriction is set. */
     public boolean isActive() {
-        return !query.isEmpty() || status != null || category != null;
+        return !query.isEmpty() || status != null || category != null || overdueOnly;
     }
 }
