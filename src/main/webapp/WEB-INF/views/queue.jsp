@@ -26,6 +26,7 @@
       </select>
     </div>
   </div>
+  <label class="check"><input type="checkbox" id="overdue" name="overdue" value="1" ${filter.overdueOnly ? 'checked' : ''}> Overdue only</label>
   <button type="submit" id="search-button">Search</button>
   <c:if test="${filter.active}">
     <a id="clear-filters" href="${pageContext.request.contextPath}/grievances">Clear</a>
