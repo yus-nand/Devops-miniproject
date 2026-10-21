@@ -1,0 +1,6 @@
+</main>
+<footer>
+  <span id="env-name">Environment: <c:out value="${envName}"/></span>
+</footer>
+</body>
+</html>
