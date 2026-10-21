@@ -90,6 +90,26 @@ public class GrievanceDao {
         }
     }
 
+    /**
+     * Changes the editable fields, but only while the grievance still belongs to this owner and is
+     * Submitted. Returns false when nothing was changed. The reference ID, due date and history stay as they are.
+     */
+    public boolean updateWhileSubmitted(long id, long ownerId, String policyNumber, Category category,
+            String title, String description) throws SQLException {
+        String sql = "UPDATE grievances SET policy_number = ?, category = ?, title = ?, description = ? "
+                + "WHERE id = ? AND policyholder_id = ? AND status = ?";
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, policyNumber);
+            ps.setString(2, category.name());
+            ps.setString(3, title);
+            ps.setString(4, description);
+            ps.setLong(5, id);
+            ps.setLong(6, ownerId);
+            ps.setString(7, Status.SUBMITTED.name());
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     /** All grievances of one policyholder, newest first. */
     public List<Grievance> findByOwner(long ownerId) throws SQLException {
         String sql = "SELECT " + COLUMNS + " FROM grievances WHERE policyholder_id = ? "

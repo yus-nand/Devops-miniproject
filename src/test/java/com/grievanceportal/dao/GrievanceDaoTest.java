@@ -1,9 +1,11 @@
 package com.grievanceportal.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.grievanceportal.model.Category;
 import com.grievanceportal.model.Grievance;
 import com.grievanceportal.model.GrievanceForm;
 import com.grievanceportal.model.HistoryEntry;
@@ -99,5 +101,23 @@ class GrievanceDaoTest {
     void fullNameLookupWorks() throws Exception {
         assertEquals("Meera Joshi", dao.fullNameOf(officer.getId()).orElseThrow());
         assertTrue(dao.fullNameOf(999999).isEmpty());
+    }
+
+    @Test
+    void updateWhileSubmittedChangesTheRowButNotAfterReview() throws Exception {
+        Grievance submitted = sample(asha, "Claim settlement delayed beyond 30 days");
+        assertTrue(dao.updateWhileSubmitted(submitted.getId(), asha.getId(), "POL-100231",
+                Category.OTHER, "Changed title", "Changed description text."));
+        Grievance reloaded = dao.findById(submitted.getId()).orElseThrow();
+        assertEquals("Changed title", reloaded.getTitle());
+        assertEquals(submitted.getRefNo(), reloaded.getRefNo());
+        assertEquals(submitted.getDueOn(), reloaded.getDueOn());
+
+        Grievance underReview = sample(asha, "Premium debited twice this month");
+        assertFalse(dao.updateWhileSubmitted(underReview.getId(), asha.getId(), "POL-100231",
+                Category.OTHER, "Should not apply", "Should not apply either."));
+        assertEquals("Premium debited twice this month", dao.findById(underReview.getId()).orElseThrow().getTitle());
+        assertFalse(dao.updateWhileSubmitted(submitted.getId(), ravi.getId(), "POL-100231",
+                Category.OTHER, "Wrong owner", "Wrong owner description."));
     }
 }

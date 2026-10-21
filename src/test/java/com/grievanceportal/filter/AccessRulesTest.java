@@ -49,6 +49,21 @@ class AccessRulesTest {
     }
 
     @Test
+    void onlyPolicyholdersMayEdit() {
+        assertTrue(AccessRules.isAllowed("GET", "/grievances/edit", Role.POLICYHOLDER));
+        assertTrue(AccessRules.isAllowed("POST", "/grievances/edit", Role.POLICYHOLDER));
+        assertFalse(AccessRules.isAllowed("GET", "/grievances/edit", Role.OFFICER));
+        assertFalse(AccessRules.isAllowed("POST", "/grievances/edit", Role.ADMIN));
+    }
+
+    @Test
+    void detailPageIsOpenToEveryRole() {
+        for (Role role : Role.values()) {
+            assertTrue(AccessRules.isAllowed("GET", "/grievances/view", role));
+        }
+    }
+
+    @Test
     void unlistedPathsAreOpenToEveryRole() {
         for (Role role : Role.values()) {
             assertTrue(AccessRules.isAllowed("GET", "/home", role));
