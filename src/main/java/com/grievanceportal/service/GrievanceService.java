@@ -11,6 +11,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -70,6 +71,11 @@ public class GrievanceService {
         g.setCreatedOn(today);
         g.setDueOn(today.plusDays(RESOLUTION_DAYS));
         return dao.create(g, LocalDateTime.now(clock));
+    }
+
+    /** The grievances this user submitted, newest first. */
+    public List<Grievance> listOwn(User user) throws SQLException {
+        return dao.findByOwner(user.getId());
     }
 
     /** Finds a grievance by reference number, only if it belongs to this user. */

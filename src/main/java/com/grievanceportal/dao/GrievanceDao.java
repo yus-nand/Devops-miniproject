@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,6 +86,22 @@ public class GrievanceDao {
                 return rs.next() ? Optional.of(map(rs)) : Optional.empty();
             }
         }
+    }
+
+    /** All grievances of one policyholder, newest first. */
+    public List<Grievance> findByOwner(long ownerId) throws SQLException {
+        String sql = "SELECT " + COLUMNS + " FROM grievances WHERE policyholder_id = ? "
+                + "ORDER BY created_on DESC, id DESC";
+        List<Grievance> result = new ArrayList<>();
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, ownerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(map(rs));
+                }
+            }
+        }
+        return result;
     }
 
     private static Grievance map(ResultSet rs) throws SQLException {
