@@ -1,5 +1,6 @@
 package com.grievanceportal.filter;
 
+import com.grievanceportal.model.User;
 import com.grievanceportal.util.AppConfig;
 import com.grievanceportal.util.Csrf;
 import jakarta.servlet.Filter;
@@ -13,7 +14,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-/** Requires login for every page except login, health and static files, and checks CSRF tokens on POST. */
+/**
+ * Requires login for every page except login, health and static files, checks CSRF tokens on POST,
+ * and enforces the role rules in AccessRules.
+ */
 @WebFilter("/*")
 public class AuthFilter implements Filter {
 
@@ -38,9 +42,14 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        boolean loggedIn = session.getAttribute("user") != null;
-        if (!loggedIn && !path.equals("/login")) {
+        User user = (User) session.getAttribute("user");
+        if (user == null && !path.equals("/login")) {
             response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+
+        if (user != null && !AccessRules.isAllowed(request.getMethod(), path, user.getRole())) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "You do not have access to this page.");
             return;
         }
         chain.doFilter(req, res);
