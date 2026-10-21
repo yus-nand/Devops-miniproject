@@ -2,6 +2,7 @@ package com.grievanceportal.controller;
 
 import com.grievanceportal.model.User;
 import com.grievanceportal.service.GrievanceService;
+import com.grievanceportal.service.Overdue;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,7 +21,7 @@ public class MyGrievancesServlet extends HttpServlet {
             throws ServletException, IOException {
         User user = (User) request.getSession().getAttribute("user");
         try {
-            request.setAttribute("grievances", service.listOwn(user));
+            request.setAttribute("rows", Overdue.flag(service.listOwn(user)));
         } catch (SQLException e) {
             throw new ServletException("Could not load your grievances", e);
         }

@@ -20,5 +20,10 @@ form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border:
 .grid th, .grid td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #dde2e8; }
 .grid th { background: #e9edf2; }
 .notice { background: #eef3f8; padding: 12px; border-radius: 4px; }
+.filters .filter-row { display: flex; gap: 16px; }
+.filters .filter-row > div { flex: 1; }
+.filters a { margin-left: 12px; }
+.badge-overdue { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 3px; background: #9b1c1c; color: #fff; font-size: 0.75rem; font-weight: 600; }
+.overdue-row td { background: #fff5f5; }
 .grid .col-ref, .grid .col-due { white-space: nowrap; }
 .prose { white-space: pre-wrap; }
