@@ -3,6 +3,7 @@ package com.grievanceportal.service;
 import com.grievanceportal.dao.GrievanceDao;
 import com.grievanceportal.model.Category;
 import com.grievanceportal.model.Grievance;
+import com.grievanceportal.model.GrievanceDetail;
 import com.grievanceportal.model.GrievanceForm;
 import com.grievanceportal.model.Status;
 import com.grievanceportal.model.User;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -76,6 +78,59 @@ public class GrievanceService {
     /** The grievances this user submitted, newest first. */
     public List<Grievance> listOwn(User user) throws SQLException {
         return dao.findByOwner(user.getId());
+    }
+
+    /**
+     * The detail view of one grievance. A policyholder gets it only for their own grievances,
+     * staff get it for any grievance. Anything else looks the same as a missing grievance.
+     */
+    public Optional<GrievanceDetail> findDetail(long id, User viewer) throws SQLException {
+        Optional<Grievance> found = dao.findById(id);
+        if (found.isEmpty()) {
+            return Optional.empty();
+        }
+        Grievance g = found.get();
+        boolean own = g.getPolicyholderId() == viewer.getId();
+        if (viewer.isPolicyholder() && !own) {
+            return Optional.empty();
+        }
+        String policyholderName = dao.fullNameOf(g.getPolicyholderId()).orElse("Unknown");
+        String officerName = g.getAssignedOfficerId() == null
+                ? null
+                : dao.fullNameOf(g.getAssignedOfficerId()).orElse(null);
+        boolean editable = viewer.isPolicyholder() && own && g.getStatus() == Status.SUBMITTED;
+        return Optional.of(new GrievanceDetail(g, dao.historyOf(id), policyholderName, officerName, editable));
+    }
+
+    /** Finds a grievance by id, only if it belongs to this user. */
+    public Optional<Grievance> findOwnById(long id, User user) throws SQLException {
+        return dao.findById(id).filter(g -> g.getPolicyholderId() == user.getId());
+    }
+
+    /**
+     * Saves new values for a grievance the user owns, while it is still Submitted.
+     * The reference ID, due date and status stay as they are.
+     *
+     * @throws NoSuchElementException if the grievance does not exist or is not the user's
+     * @throws IllegalStateException if review has started, so editing is closed
+     * @throws IllegalArgumentException if the form is not valid
+     */
+    public Grievance update(User user, long id, GrievanceForm form) throws SQLException {
+        Grievance current = findOwnById(id, user)
+                .orElseThrow(() -> new NoSuchElementException("Grievance not found"));
+        if (current.getStatus() != Status.SUBMITTED) {
+            throw new IllegalStateException("The grievance can no longer be edited");
+        }
+        Map<String, String> errors = validate(form);
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException("The form is not valid: " + errors.keySet());
+        }
+        boolean saved = dao.updateWhileSubmitted(id, user.getId(), form.getPolicyNumber(),
+                Category.parse(form.getCategory()).orElseThrow(), form.getTitle(), form.getDescription());
+        if (!saved) {
+            throw new IllegalStateException("The grievance can no longer be edited");
+        }
+        return dao.findById(id).orElseThrow();
     }
 
     /** Finds a grievance by reference number, only if it belongs to this user. */

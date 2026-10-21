@@ -21,3 +21,4 @@ form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border:
 .grid th { background: #e9edf2; }
 .notice { background: #eef3f8; padding: 12px; border-radius: 4px; }
 .grid .col-ref, .grid .col-due { white-space: nowrap; }
+.prose { white-space: pre-wrap; }

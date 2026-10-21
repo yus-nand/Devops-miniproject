@@ -18,6 +18,8 @@
 </dl>
 <p>We aim to resolve your grievance by the due date, which is 14 days after submission.</p>
 <p>
+  <a id="view-detail" href="${pageContext.request.contextPath}/grievances/view?id=${grievance.id}">View this grievance</a>
+  &middot;
   <a id="view-mine" href="${pageContext.request.contextPath}/grievances/mine">View my grievances</a>
   &middot;
   <a id="back-home" href="${pageContext.request.contextPath}/home">Back to home</a>

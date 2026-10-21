@@ -2,6 +2,8 @@ package com.grievanceportal.dao;
 
 import com.grievanceportal.model.Category;
 import com.grievanceportal.model.Grievance;
+import com.grievanceportal.model.HistoryEntry;
+import com.grievanceportal.model.Role;
 import com.grievanceportal.model.Status;
 import com.grievanceportal.util.Database;
 import java.sql.Connection;
@@ -88,6 +90,26 @@ public class GrievanceDao {
         }
     }
 
+    /**
+     * Changes the editable fields, but only while the grievance still belongs to this owner and is
+     * Submitted. Returns false when nothing was changed. The reference ID, due date and history stay as they are.
+     */
+    public boolean updateWhileSubmitted(long id, long ownerId, String policyNumber, Category category,
+            String title, String description) throws SQLException {
+        String sql = "UPDATE grievances SET policy_number = ?, category = ?, title = ?, description = ? "
+                + "WHERE id = ? AND policyholder_id = ? AND status = ?";
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, policyNumber);
+            ps.setString(2, category.name());
+            ps.setString(3, title);
+            ps.setString(4, description);
+            ps.setLong(5, id);
+            ps.setLong(6, ownerId);
+            ps.setString(7, Status.SUBMITTED.name());
+            return ps.executeUpdate() == 1;
+        }
+    }
+
     /** All grievances of one policyholder, newest first. */
     public List<Grievance> findByOwner(long ownerId) throws SQLException {
         String sql = "SELECT " + COLUMNS + " FROM grievances WHERE policyholder_id = ? "
@@ -102,6 +124,52 @@ public class GrievanceDao {
             }
         }
         return result;
+    }
+
+    /** Finds a grievance by its numeric id. */
+    public Optional<Grievance> findById(long id) throws SQLException {
+        String sql = "SELECT " + COLUMNS + " FROM grievances WHERE id = ?";
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(map(rs)) : Optional.empty();
+            }
+        }
+    }
+
+    /** The status history of one grievance, oldest first, with the name and role of who changed it. */
+    public List<HistoryEntry> historyOf(long grievanceId) throws SQLException {
+        String sql = "SELECT h.from_status, h.to_status, h.note, h.changed_at, u.full_name, u.role "
+                + "FROM status_history h JOIN users u ON u.id = h.changed_by "
+                + "WHERE h.grievance_id = ? ORDER BY h.changed_at, h.id";
+        List<HistoryEntry> result = new ArrayList<>();
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, grievanceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String from = rs.getString("from_status");
+                    result.add(new HistoryEntry(
+                            from == null ? null : Status.valueOf(from),
+                            Status.valueOf(rs.getString("to_status")),
+                            rs.getString("full_name"),
+                            Role.valueOf(rs.getString("role")),
+                            rs.getString("note"),
+                            rs.getTimestamp("changed_at").toLocalDateTime()));
+                }
+            }
+        }
+        return result;
+    }
+
+    /** The full name of a user, if that user exists. */
+    public Optional<String> fullNameOf(long userId) throws SQLException {
+        try (Connection c = Database.getConnection();
+                PreparedStatement ps = c.prepareStatement("SELECT full_name FROM users WHERE id = ?")) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? Optional.of(rs.getString(1)) : Optional.empty();
+            }
+        }
     }
 
     private static Grievance map(ResultSet rs) throws SQLException {
