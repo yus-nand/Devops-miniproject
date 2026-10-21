@@ -6,5 +6,6 @@
 <p>You are signed in as <strong><c:out value="${sessionScope.user.role}"/></strong>.</p>
 <c:if test="${sessionScope.user.policyholder}">
   <p><a id="submit-link" href="${pageContext.request.contextPath}/grievances/new">Submit a grievance</a></p>
+  <p><a id="mine-link" href="${pageContext.request.contextPath}/grievances/mine">My grievances</a></p>
 </c:if>
 <%@ include file="_footer.jspf" %>

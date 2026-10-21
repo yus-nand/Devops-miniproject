@@ -16,3 +16,7 @@ form select, form textarea { width: 100%; padding: 8px; margin-top: 4px; border:
 .summary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; }
 .summary dt { font-weight: 600; }
 .summary dd { margin: 0; }
+.grid { width: 100%; border-collapse: collapse; margin-top: 12px; background: #fff; }
+.grid th, .grid td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #dde2e8; }
+.grid th { background: #e9edf2; }
+.notice { background: #eef3f8; padding: 12px; border-radius: 4px; }

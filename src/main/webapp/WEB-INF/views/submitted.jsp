@@ -17,5 +17,9 @@
   <dd><c:out value="${grievance.title}"/></dd>
 </dl>
 <p>We aim to resolve your grievance by the due date, which is 14 days after submission.</p>
-<p><a id="back-home" href="${pageContext.request.contextPath}/home">Back to home</a></p>
+<p>
+  <a id="view-mine" href="${pageContext.request.contextPath}/grievances/mine">View my grievances</a>
+  &middot;
+  <a id="back-home" href="${pageContext.request.contextPath}/home">Back to home</a>
+</p>
 <%@ include file="_footer.jspf" %>
