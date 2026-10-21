@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><c:out value="${pageTitle}"/> - Grievance Portal</title>
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/css/app.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="${pageContext.request.contextPath}/home">Policyholder Grievance Portal</a>
+  <c:if test="${not empty sessionScope.user}">
+    <form class="logout" method="post" action="${pageContext.request.contextPath}/logout">
+      <input type="hidden" name="_csrf" value="${csrfToken}">
+      <span id="current-user"><c:out value="${sessionScope.user.fullName}"/> (<c:out value="${sessionScope.user.role}"/>)</span>
+      <button type="submit" id="logout-button">Log out</button>
+    </form>
+  </c:if>
+</header>
+<main>

@@ -6,6 +6,8 @@ A small Java web application for recording and tracking insurance grievances. Po
 
 The application is built in sprints. The backlog and plan are in `docs/02-agile-plan.md`.
 
+Version 1.0.0 is the complete MVP: all 15 user stories (US-01 to US-15) are implemented and tested. Policyholders submit, edit and track grievances. Officers and admins list, search and filter every grievance, see Overdue flags and follow the status workflow. Admins close or reopen grievances and see a summary dashboard.
+
 ## Technology
 
 | Layer | Choice |
@@ -45,6 +47,28 @@ copy target\grievance-portal.war <tomcat>\webapps\
 ```
 
 Then open http://localhost:8080/grievance-portal/ .
+
+## Demo accounts and configuration
+
+The first start creates these synthetic accounts and a few sample grievances. All of them share the password `demo123`. They are for local demos only.
+
+| Username | Role |
+| --- | --- |
+| `asha`, `ravi` | Policyholder |
+| `officer1` | Officer |
+| `officer2` | Officer (a second officer, to try picking up a grievance someone else already took) |
+| `admin1` | Admin |
+
+Seeding is safe to repeat: restarting the application does not duplicate users or sample grievances.
+
+Settings are read from system properties, then environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `GP_DB_PATH` | `${catalina.base}/data/grievance-db` under Tomcat, otherwise `./data/grievance-db` | Location of the H2 database file. A value starting with `mem:` gives an in-memory database, used by the tests. |
+| `GP_ENV_NAME` | `local` | Environment label shown in the page footer |
+
+`GET /health` returns `{"status":"UP","version":"...","environment":"..."}` and needs no login. It answers 503 with `"status":"DOWN"` when the database cannot be reached.
 
 ## Documents
 
