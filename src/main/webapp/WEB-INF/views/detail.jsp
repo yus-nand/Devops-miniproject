@@ -30,7 +30,7 @@
   <dd id="due-date"><c:out value="${g.dueOn}"/>
     <c:if test="${overdue}"><span class="badge-overdue" id="overdue-flag">Overdue</span></c:if></dd>
   <dt>Assigned officer</dt>
-  <dd id="assigned-officer"><c:out value="${empty detail.officerName ? 'Not assigned yet' : detail.officerName}"/></dd>
+  <dd id="assigned-officer"><c:out value="${empty detail.officerName ? 'Not assigned yet' : 'Not assigned yet'}"/></dd>
   <dt>Description</dt>
   <dd id="description" class="prose"><c:out value="${g.description}"/></dd>
   <c:if test="${not empty g.resolutionNote}">
