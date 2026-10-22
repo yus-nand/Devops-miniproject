@@ -22,13 +22,13 @@ class OfficerWorkflowTest extends UiTestBase {
         openFromQueue(refNo);
         assertEquals("Submitted", byId("status").getText());
 
-        byId("pickup-button").click();
+        clickAndWaitForNewPage("pickup-button");
         assertEquals("Under Review", byId("status").getText());
         assertEquals("Meera Joshi", byId("assigned-officer").getText());
 
         String note = "Claim paid on 22 Oct, cheque sent.";
         byId("note").sendKeys(note);
-        byId("move-RESOLVED").click();
+        clickAndWaitForNewPage("move-RESOLVED");
         assertEquals("Resolved", byId("status").getText());
         assertEquals(note, byId("resolution-note").getText());
         logout();
@@ -50,7 +50,7 @@ class OfficerWorkflowTest extends UiTestBase {
 
         login("officer1");
         openFromQueue(refNo);
-        byId("pickup-button").click();
+        clickAndWaitForNewPage("pickup-button");
         byId("move-RESOLVED").click();
 
         assertTrue(byId("action-error").isDisplayed(), "An error message should explain the refusal");
