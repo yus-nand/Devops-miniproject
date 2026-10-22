@@ -1,0 +1,29 @@
+﻿===== BEFORE the commit (10/23/2026 03:57:14) =====
+
+> docker ps --filter name=grievance-portal --format "table {{.Names}}\t{{.Image}}\t{{.CreatedAt}}\t{{.Status}}"
+NAMES              IMAGE                                         CREATED AT                      STATUS
+grievance-portal   localhost:5000/grievance-portal:b12-c11f71b   2026-10-23 03:53:43 +0530 IST   Up 3 minutes
+
+
+> curl.exe -s http://localhost:5000/v2/grievance-portal/tags/list
+{"name":"grievance-portal","tags":["b12-c11f71b"]}
+
+
+> curl.exe -s http://localhost:8082/grievance-portal/health
+{"status":"UP","version":"1.0.0","environment":"docker-build-12"}
+
+
+===== AFTER the commit (10/23/2026 04:01:32) =====
+
+> docker ps --filter name=grievance-portal --format "table {{.Names}}\t{{.Image}}\t{{.CreatedAt}}\t{{.Status}}"
+NAMES              IMAGE                                         CREATED AT                      STATUS
+grievance-portal   localhost:5000/grievance-portal:b13-6e70a9f   2026-10-23 04:01:10 +0530 IST   Up 21 seconds
+
+
+> curl.exe -s http://localhost:5000/v2/grievance-portal/tags/list
+{"name":"grievance-portal","tags":["b12-c11f71b","b13-6e70a9f"]}
+
+
+> curl.exe -s http://localhost:8082/grievance-portal/health
+{"status":"UP","version":"1.0.0","environment":"docker-build-13"}
+
