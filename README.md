@@ -78,6 +78,26 @@ The Test stage runs `mvn verify -Pci-ui -Dskip.unit=true`. The same command work
 
 The `DEPLOY_ENV` parameter picks the target: `local` deploys `/grievance-portal`, `staging` deploys `/grievance-portal-staging`. Both use the same Tomcat and the same H2 database file, so deploying one removes the other.
 
+### Continuous deployment with Docker
+
+With `DEPLOY_TARGET=docker` (the default) the pipeline continues after the Test stage like this:
+
+| Stage | What it does |
+| --- | --- |
+| Docker check | Stops early if Jenkins cannot reach the Docker engine (runs before the long build) |
+| Image | `docker build`, tagged `localhost:5000/grievance-portal:b<build number>-<commit>` |
+| Push | Pushes the tag to the registry and prints the tags the registry now holds |
+| Run container | Pulls the image back, removes the old container and starts the new one on port 8082 |
+| Verify | Waits for `/health` to report `UP`; the footer and `/health` show `docker-build-<build number>` |
+
+A commit on `develop` starts a run within about two minutes (Poll SCM), and the container is replaced only if the unit tests and the browser tests passed. The registry is a local container:
+
+```
+docker run -d --restart unless-stopped --name registry -p 5000:5000 -v registry-data:/var/lib/registry registry:2
+```
+
+The tags it holds are listed at http://localhost:5000/v2/grievance-portal/tags/list. `DEPLOY_TARGET=tomcat` keeps the earlier behaviour of copying the WAR into the local Tomcat.
+
 ## Browser tests
 
 Selenium tests in `src/test/java/com/grievanceportal/ui` drive a real browser through the five main journeys (plan: `docs/04-test-plan.md`). They run against an application that is already deployed, so deploy first, then:
