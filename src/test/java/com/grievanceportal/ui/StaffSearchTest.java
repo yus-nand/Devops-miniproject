@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /** Journey J3: staff search the queue by reference ID. */
 class StaffSearchTest extends UiTestBase {
@@ -23,6 +24,9 @@ class StaffSearchTest extends UiTestBase {
             byId("q").sendKeys(query);
             byId("search-button").click();
 
+            // The unfiltered list also shows a result count, so wait for the filtered page, not just any count.
+            wait.until(ExpectedConditions.urlContains("q="));
+            wait.until(d -> d.findElement(By.id("result-count")).getText().startsWith("1 grievance"));
             assertTrue(byId("result-count").getText().startsWith("1 grievance"),
                     "Expected one result for " + query);
             assertEquals(refNo, driver.findElement(By.cssSelector("td.col-ref")).getText().trim());
