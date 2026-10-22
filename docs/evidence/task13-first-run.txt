@@ -1,0 +1,40 @@
+===== first run: Thu Oct 22 22:55:51 UTC 2026 =====
+== Puppet 8.4.0, WAR /mnt/c/Users/nandi/OneDrive/Desktop/Engineering/sem 7 (ignorance is bliss)/DevOps/mini project/Devops miniproject/target/grievance-portal.war
+== Syntax check
+syntax ok
+== Apply
+Notice: Compiled catalog for msi in environment production in 0.42 seconds
+Notice: /Stage[main]/Grievance_portal/Package[openjdk-17-jre-headless]/ensure: created
+Notice: /Stage[main]/Grievance_portal/Package[tomcat10]/ensure: created
+Notice: /Stage[main]/Grievance_portal/File[/var/lib/grievance-portal]/ensure: created
+Notice: /Stage[main]/Grievance_portal/File[/etc/default/tomcat10]/content: content changed '{sha256}34b07a540be9a6886290274c48d1cb2c4bc4fa24dda3f4da709b1b442705a278' to '{sha256}73c9b010b306e789f79b455087d49788c5d4d7c6b5c09c4033d75254492c5dc4'
+Notice: /Stage[main]/Grievance_portal/File[/etc/tomcat10/server.xml]/content: content changed '{sha256}ad6b2ea1279d10ba61b48cc62b35b263d5c5f5cfffe62d1550d5ba53f664a1b9' to '{sha256}730a6c3e1c993b965e00cb7f3cbb57c6505e75412fd37435aff46855d2c16892'
+Notice: /Stage[main]/Grievance_portal/File[/etc/systemd/system/tomcat10.service.d]/ensure: created
+Notice: /Stage[main]/Grievance_portal/File[/etc/systemd/system/tomcat10.service.d/grievance-portal.conf]/ensure: defined content as '{sha256}b714f03fde4bcf8687aff67e52e1ccb6824e9140236aa832fa5cfc701176b18d'
+Notice: /Stage[main]/Grievance_portal/Exec[systemd-daemon-reload]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Grievance_portal/File[/var/lib/tomcat10/webapps/grievance-portal.war]/ensure: defined content as '{sha256}93930635bb3a9ac2b594ab4991e937b095cdb626d97ecaea00fcd5afe138fa5a'
+Notice: /Stage[main]/Grievance_portal/Service[tomcat10]: Triggered 'refresh' from 3 events
+Notice: Applied catalog in 56.23 seconds
+== Result: changes were applied
+exit code: 0
+
+===== checks after the run =====
+
+> systemctl is-active tomcat10
+active
+
+> systemctl is-enabled tomcat10
+enabled
+
+> ss -ltn | grep 8083
+LISTEN 0      100                 *:8083            *:*          
+
+> id tomcat
+uid=989(tomcat) gid=989(tomcat) groups=989(tomcat)
+
+> ls -ld /var/lib/grievance-portal /var/lib/tomcat10/webapps/grievance-portal.war
+drwxr-x--- 2 tomcat tomcat    4096 Oct 22 22:56 /var/lib/grievance-portal
+-rw-r----- 1 tomcat tomcat 6065854 Oct 22 22:56 /var/lib/tomcat10/webapps/grievance-portal.war
+
+> curl -s http://localhost:8083/grievance-portal/health
+{"status":"UP","version":"1.0.0","environment":"puppet-node"}
