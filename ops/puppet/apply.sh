@@ -11,6 +11,11 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 repo="$(cd "$here/../.." && pwd)"
 export FACTER_war_source="${WAR_SOURCE:-$repo/target/grievance-portal.war}"
 
+noop=0
+for arg in "$@"; do
+  [ "$arg" = "--noop" ] && noop=1
+done
+
 if ! command -v puppet > /dev/null 2>&1; then
   echo "puppet is not installed. Run: sudo apt-get update && sudo apt-get install -y puppet-agent" >&2
   exit 1
@@ -31,8 +36,13 @@ sudo --preserve-env=FACTER_war_source puppet apply --detailed-exitcodes \
   --modulepath "$here/modules" "$here/manifests/site.pp" "$@"
 code=$?
 case $code in
-  0) echo "== Result: no changes were needed" ;;
-  2) echo "== Result: changes were applied (or, with --noop, would be applied)" ;;
+  0) if [ "$noop" -eq 1 ]; then
+       # With --noop Puppet exits 0 even when it plans changes, so the Notice lines above are the answer.
+       echo "== Result: dry run finished, nothing was changed (the Notice lines above show what a real run would change)"
+     else
+       echo "== Result: no changes were needed"
+     fi ;;
+  2) echo "== Result: changes were applied" ;;
   *) echo "== Result: FAILED (exit code $code)" ;;
 esac
 [ "$code" -eq 0 ] || [ "$code" -eq 2 ]
