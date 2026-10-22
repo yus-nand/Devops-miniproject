@@ -61,6 +61,20 @@ A Jenkins job named `grievance-portal-ci` builds the project automatically. It r
 
 Current Jenkins releases need Java 21 or newer to run. The project still targets Java 17, which a JDK 21 builds without changes.
 
+### Pipeline job
+
+`Jenkinsfile` in the repository root defines a second, pipeline-style job (`grievance-portal-pipeline`, "Pipeline script from SCM", branch `develop`). It is run on demand with **Build with Parameters**.
+
+| Stage | What it does |
+| --- | --- |
+| Checkout | Fetches the branch from GitHub |
+| Build | `mvn clean test`, test results are published to Jenkins |
+| Package | `mvn package -DskipTests`, the WAR is archived |
+| Deploy | Copies the WAR into Tomcat's `webapps` folder |
+| Verify | Polls `/health` until it reports `UP`, otherwise the build fails |
+
+The `DEPLOY_ENV` parameter picks the target: `local` deploys `/grievance-portal`, `staging` deploys `/grievance-portal-staging`. Both use the same Tomcat and the same H2 database file, so deploying one removes the other.
+
 ## Demo accounts and configuration
 
 The first start creates these synthetic accounts and a few sample grievances. All of them share the password `demo123`. They are for local demos only.
