@@ -1,0 +1,10 @@
+<%- | String $java_home,
+      String $heap_min,
+      String $heap_max,
+      String $data_dir,
+      String $env_name | -%>
+# Managed by Puppet (class grievance_portal). Changes made by hand are overwritten.
+JAVA_HOME=<%= $java_home %>
+JAVA_OPTS="-Djava.awt.headless=true -Xms<%= $heap_min %> -Xmx<%= $heap_max %> -DGP_DB_PATH=<%= $data_dir %>/grievance-db -DGP_ENV_NAME=<%= $env_name %>"
+# The security manager is deprecated in Tomcat 10.1 and would block writes to the database folder.
+TOMCAT_SECURITY=no

@@ -1,0 +1,12 @@
+<%- | Integer $http_port | -%>
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Managed by Puppet (class grievance_portal). Changes made by hand are overwritten. -->
+<Server port="-1" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <Service name="Catalina">
+    <Connector port="<%= $http_port %>" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="8443" />
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true" />
+    </Engine>
+  </Service>
+</Server>
