@@ -1,0 +1,4 @@
+<%- | String $data_dir | -%>
+# Managed by Puppet (class grievance_portal). Changes made by hand are overwritten.
+[Service]
+ReadWritePaths=<%= $data_dir %>

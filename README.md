@@ -153,11 +153,26 @@ Settings are read from system properties, then environment variables:
 
 `GET /health` returns `{"status":"UP","version":"...","environment":"..."}` and needs no login. It answers 503 with `"status":"DOWN"` when the database cannot be reached.
 
+## Server provisioning with Puppet
+
+`ops/puppet/` holds the Puppet code that turns a clean Ubuntu 24.04 machine into a portal server: Java 17, Tomcat 10, a `tomcat`-owned data folder, the generated configuration files and the deployed WAR, served on port 8083. The specification it implements is `docs/07-server-specification.md`.
+
+```bash
+sudo apt-get update && sudo apt-get install -y puppet-agent   # once per node
+ops/puppet/apply.sh --noop                                     # preview
+ops/puppet/apply.sh                                            # apply
+curl -s http://localhost:8083/grievance-portal/health
+```
+
 ## Documents
 
 - `docs/01-problem-definition.md`: problem, stakeholders, objectives, MVP scope
 - `docs/02-agile-plan.md`: user stories, backlog, sprint plan, Definition of Done, DevOps lifecycle
 - `docs/03-requirements-architecture.md`: requirements, workflow, architecture, data model, URLs
+- `docs/04-test-plan.md`: browser test journeys and how the tests run
+- `docs/05-container-lifecycle.md`: the Docker container lifecycle, from the command log
+- `docs/06-continuous-deployment.md`: the commit-to-container flow of the Jenkins pipeline
+- `docs/07-server-specification.md`: what a server needs, as implemented by the Puppet code
 
 ## Branching strategy
 

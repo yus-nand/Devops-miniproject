@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Puppet code is read by Linux tools: always LF, even on a Windows checkout
+ops/puppet/** text eol=lf
