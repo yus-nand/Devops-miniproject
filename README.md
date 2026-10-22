@@ -75,6 +75,27 @@ Current Jenkins releases need Java 21 or newer to run. The project still targets
 
 The `DEPLOY_ENV` parameter picks the target: `local` deploys `/grievance-portal`, `staging` deploys `/grievance-portal-staging`. Both use the same Tomcat and the same H2 database file, so deploying one removes the other.
 
+## Browser tests
+
+Selenium tests in `src/test/java/com/grievanceportal/ui` drive a real browser through the five main journeys (plan: `docs/04-test-plan.md`). They run against an application that is already deployed, so deploy first, then:
+
+```
+mvn test -Pui
+```
+
+Brave is used if it is installed, otherwise Chrome or Edge, without a window. Useful options:
+
+| Option | Meaning |
+| --- | --- |
+| `-Dui.headless=false` | show the browser while the tests run |
+| `-Dui.browser=chrome` | prefer `brave`, `chrome` or `edge` |
+| `-Dui.browser.path="C:\path\to\brave.exe"` | use this browser program |
+| `-Dui.driver.path="C:\path\to\chromedriver.exe"` | use this driver instead of the automatic download |
+| `-Dui.baseUrl=http://localhost:8080/grievance-portal` | address of the deployed application |
+| `-Dui.forceFail=true` | run the test that fails on purpose, to see the failure screenshot |
+
+A failing test saves a screenshot in `target/screenshots`. An HTML report is made with `mvn -Pui test surefire-report:report-only` (`target/site/surefire-report.html`). The normal `mvn test`, and the Jenkins jobs, skip these tests.
+
 ## Demo accounts and configuration
 
 The first start creates these synthetic accounts and a few sample grievances. All of them share the password `demo123`. They are for local demos only.
