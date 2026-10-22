@@ -16,6 +16,10 @@
     <!-- Browser tests (tag "ui") are skipped by default; run them with -Pui. -->
     <included.tags></included.tags>
     <excluded.tags>ui</excluded.tags>
+    <!-- Settings for the pipeline Test stage (profile ci-ui). -->
+    <skip.unit>false</skip.unit>
+    <tomcat.home>C:/tools/apache-tomcat-10.1.61</tomcat.home>
+    <ci.port>8090</ci.port>
   </properties>
 
   <dependencies>
@@ -81,6 +85,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
+          <skip>${skip.unit}</skip>
           <groups>${included.tags}</groups>
           <excludedGroups>${excluded.tags}</excludedGroups>
         </configuration>
@@ -101,6 +106,92 @@
         <included.tags>ui</included.tags>
         <excluded.tags>none</excluded.tags>
       </properties>
+    </profile>
+    <profile>
+      <!--
+        mvn verify -Pci-ui starts a second, throw-away Tomcat on port ${ci.port} with an in-memory database,
+        deploys the WAR to it, runs the Selenium tests against it, and stops it again. Nothing on the real
+        Tomcat (port 8080) is touched. Add -Dskip.unit=true to leave out the unit tests.
+      -->
+      <id>ci-ui</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven3-plugin</artifactId>
+            <version>1.10.29</version>
+            <configuration>
+              <container>
+                <containerId>tomcat10x</containerId>
+                <type>installed</type>
+                <home>${tomcat.home}</home>
+                <timeout>180000</timeout>
+                <systemProperties>
+                  <GP_DB_PATH>mem:citest</GP_DB_PATH>
+                  <GP_ENV_NAME>ci-test</GP_ENV_NAME>
+                </systemProperties>
+              </container>
+              <configuration>
+                <type>standalone</type>
+                <home>${project.build.directory}/cargo-tomcat</home>
+                <properties>
+                  <cargo.servlet.port>${ci.port}</cargo.servlet.port>
+                  <cargo.rmi.port>8205</cargo.rmi.port>
+                  <cargo.tomcat.ajp.port>8019</cargo.tomcat.ajp.port>
+                </properties>
+              </configuration>
+              <deployables>
+                <deployable>
+                  <type>war</type>
+                  <location>${project.build.directory}/${project.build.finalName}.war</location>
+                  <properties>
+                    <context>/grievance-portal</context>
+                  </properties>
+                </deployable>
+              </deployables>
+            </configuration>
+            <executions>
+              <execution>
+                <id>start-test-tomcat</id>
+                <phase>pre-integration-test</phase>
+                <goals>
+                  <goal>start</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>stop-test-tomcat</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>stop</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>3.2.5</version>
+            <configuration>
+              <groups>ui</groups>
+              <excludedGroups>none</excludedGroups>
+              <includes>
+                <include>**/ui/*Test.java</include>
+              </includes>
+              <systemPropertyVariables>
+                <ui.baseUrl>http://localhost:${ci.port}/grievance-portal</ui.baseUrl>
+              </systemPropertyVariables>
+            </configuration>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>

@@ -20,6 +20,7 @@ import org.openqa.selenium.edge.EdgeOptions;
  *   <li>{@code ui.browser}: brave, chrome or edge, to prefer one of the installed browsers</li>
  *   <li>{@code ui.driver.path}: a chromedriver.exe to use instead of the automatic download</li>
  *   <li>{@code ui.headless}: true (default) runs without a window, false shows the browser</li>
+ *   <li>{@code ui.noSandbox}: true adds --no-sandbox, needed when Jenkins runs as the SYSTEM service</li>
  * </ul>
  * Without settings the first of Brave, Chrome and Edge found in the usual install folders is used.
  */
@@ -36,6 +37,9 @@ final class Browsers {
         List<String> arguments = new ArrayList<>(List.of("--window-size=1280,900", "--disable-gpu"));
         if (headless) {
             arguments.add("--headless=new");
+        }
+        if (Boolean.getBoolean("ui.noSandbox")) {
+            arguments.add("--no-sandbox");
         }
 
         if (binary != null && binary.getFileName().toString().toLowerCase(Locale.ROOT).contains("msedge")) {
