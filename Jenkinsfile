@@ -53,6 +53,20 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                // Starts a throw-away Tomcat on port 8090 with an in-memory database, runs the Selenium tests
+                // against it and stops it again. The real Tomcat on 8080 is not touched.
+                bat 'mvn -B verify -Pci-ui -Dskip.unit=true -Dui.noSandbox=true'
+            }
+            post {
+                always {
+                    junit testResults: 'target/failsafe-reports/TEST-*.xml', allowEmptyResults: true
+                    archiveArtifacts artifacts: 'target/screenshots/**', allowEmptyArchive: true
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 echo "Deploying to environment '${params.DEPLOY_ENV}' as /${env.APP_CONTEXT}"

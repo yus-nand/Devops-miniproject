@@ -43,7 +43,11 @@ Out of scope for now: editing a grievance, closing and reopening, and layout che
 
 `FailureDemoTest` is skipped normally. Run with `-Dui.forceFail=true` it fails on purpose, which produces the failure screenshot used as evidence.
 
-## 5. Exit criteria
+## 5. Running the tests in the pipeline (Task 10)
+
+The Jenkins pipeline has a Test stage between Package and Deploy. It cannot test the deployed application, because deployment comes after the tests. It therefore starts a throw-away copy of the same Tomcat on port 8090 (Maven profile `ci-ui`, Cargo plugin) with an empty in-memory database, runs these same tests against it, and stops it again. The real Tomcat on port 8080 and its data are not touched. The reports are published in Jenkins and screenshots are archived with the build.
+
+## 6. Exit criteria
 
 - All tests pass against a freshly deployed `develop` build.
 - A failed test leaves a screenshot in `target/screenshots`.

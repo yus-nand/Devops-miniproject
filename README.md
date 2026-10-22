@@ -70,8 +70,11 @@ Current Jenkins releases need Java 21 or newer to run. The project still targets
 | Checkout | Fetches the branch from GitHub |
 | Build | `mvn clean test`, test results are published to Jenkins |
 | Package | `mvn package -DskipTests`, the WAR is archived |
+| Test | Starts a throw-away Tomcat on port 8090 with an in-memory database, runs the Selenium browser tests against it, publishes the report and any failure screenshots. A failing test stops the pipeline here, before Deploy |
 | Deploy | Copies the WAR into Tomcat's `webapps` folder |
 | Verify | Polls `/health` until it reports `UP`, otherwise the build fails |
+
+The Test stage runs `mvn verify -Pci-ui -Dskip.unit=true`. The same command works on a developer machine (Brave is used there), and it never touches the real Tomcat on port 8080. On the Jenkins machine the tests use the Chromium browser they find in a system-wide install folder (Chrome or Edge), because the Jenkins service cannot see a per-user Brave.
 
 The `DEPLOY_ENV` parameter picks the target: `local` deploys `/grievance-portal`, `staging` deploys `/grievance-portal-staging`. Both use the same Tomcat and the same H2 database file, so deploying one removes the other.
 
