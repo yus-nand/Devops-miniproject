@@ -99,6 +99,18 @@ Brave is used if it is installed, otherwise Chrome or Edge, without a window. Us
 
 A failing test saves a screenshot in `target/screenshots`. An HTML report is made with `mvn -Pui test surefire-report:report-only` (`target/site/surefire-report.html`). The normal `mvn test`, and the Jenkins jobs, skip these tests.
 
+## Docker image
+
+The `Dockerfile` packages the WAR on the official Tomcat 10.1 image with Java 17. Build the WAR first, because the image only copies it:
+
+```
+mvn clean package -DskipTests
+docker build -t grievance-portal:1.0.0 .
+docker run -d --name grievance-portal -p 8082:8080 -v grievance-data:/usr/local/tomcat/data grievance-portal:1.0.0
+```
+
+Then open http://localhost:8082/grievance-portal/ (port 8080 is the local Tomcat and 8081 is Jenkins). The `grievance-data` volume keeps the database when the container is removed. The page footer says `Environment: docker`. The full command walk-through is in `docs/05-container-lifecycle.md`.
+
 ## Demo accounts and configuration
 
 The first start creates these synthetic accounts and a few sample grievances. All of them share the password `demo123`. They are for local demos only.
