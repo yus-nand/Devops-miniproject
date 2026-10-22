@@ -35,10 +35,12 @@ pipeline {
     }
 
     environment {
-        // Machine-specific locations: change these two lines if the tools live elsewhere.
+        // Machine-specific locations: change these lines if the tools live elsewhere.
+        // The Jenkins service does not inherit the PATH of the logged-in user, so the folders are added here.
         MAVEN_BIN   = 'C:\\DevTools\\Maven\\apache-maven-3.9.16\\bin'
+        DOCKER_BIN  = 'C:\\Users\\nandi\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
         TOMCAT_HOME = 'C:\\tools\\apache-tomcat-10.1.61'
-        PATH        = "${MAVEN_BIN};${env.PATH}"
+        PATH        = "${MAVEN_BIN};${DOCKER_BIN};${env.PATH}"
         TOMCAT_URL  = 'http://localhost:8080'
         IMAGE_NAME     = 'grievance-portal'
         CONTAINER_NAME = 'grievance-portal'
