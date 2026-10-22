@@ -18,7 +18,7 @@ class SubmitGrievanceTest extends UiTestBase {
 
         String refNo = submitGrievance(title);
 
-        assertTrue(refNo.matches("GRV-\\d{4,}"), "Reference ID looks wrong: " + refNo);
+        assertTrue(refNo.matches("GRV-\\d{4}-\\d{4,}"), "Reference ID looks wrong: " + refNo);
         assertEquals("Submitted", byId("status").getText());
 
         driver.get(url("/grievances/mine"));

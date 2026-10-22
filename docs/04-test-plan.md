@@ -32,7 +32,7 @@ Out of scope for now: editing a grievance, closing and reopening, and layout che
 
 | ID | Journey | Story | Test | Expected result |
 | --- | --- | --- | --- | --- |
-| J1 | A policyholder submits a grievance | US-02, US-03, US-14 | `SubmitGrievanceTest.submittedGrievanceGetsAReferenceAndAppearsInMyGrievances` | A reference ID like GRV-0009 and status Submitted are shown, and the title appears once in My grievances |
+| J1 | A policyholder submits a grievance | US-02, US-03, US-14 | `SubmitGrievanceTest.submittedGrievanceGetsAReferenceAndAppearsInMyGrievances` | A reference ID like GRV-2026-0009 and status Submitted are shown, and the title appears once in My grievances |
 | J1 | Validation | US-14 | `SubmitGrievanceTest.emptyFormShowsAMessageNextToEveryField` | All four fields show an error message |
 | J2 | An officer picks up and resolves | US-08, US-09, US-10 | `OfficerWorkflowTest.officerPicksUpAndResolvesAndPolicyholderSeesTheOutcome` | Under Review with Meera Joshi assigned, then Resolved with the note, and the policyholder sees Resolved |
 | J2 | A note is required | US-10 | `OfficerWorkflowTest.resolvingWithoutANoteIsRefused` | An error message is shown and the status stays Under Review |
