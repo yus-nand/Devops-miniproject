@@ -50,6 +50,16 @@ abstract class UiTestBase {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(By.id(id)));
     }
 
+    /**
+     * Clicks a button that submits a form and waits until the old page is gone. Without the wait, the next
+     * byId() can find an element on the page that is just about to be replaced and fail with a stale element.
+     */
+    void clickAndWaitForNewPage(String id) {
+        WebElement button = byId(id);
+        button.click();
+        wait.until(ExpectedConditions.stalenessOf(button));
+    }
+
     void login(String username) {
         driver.get(url("/login"));
         byId("username").sendKeys(username);
