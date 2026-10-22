@@ -13,6 +13,9 @@
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Browser tests (tag "ui") are skipped by default; run them with -Pui. -->
+    <included.tags></included.tags>
+    <excluded.tags>ui</excluded.tags>
   </properties>
 
   <dependencies>
@@ -43,6 +46,12 @@
       <version>5.10.2</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.48.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -71,7 +80,27 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+        <configuration>
+          <groups>${included.tags}</groups>
+          <excludedGroups>${excluded.tags}</excludedGroups>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>3.2.5</version>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!-- mvn test -Pui runs only the Selenium browser tests against the deployed application. -->
+      <id>ui</id>
+      <properties>
+        <included.tags>ui</included.tags>
+        <excluded.tags>none</excluded.tags>
+      </properties>
+    </profile>
+  </profiles>
 </project>
