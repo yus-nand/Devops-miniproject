@@ -17,7 +17,8 @@ stored="/opt/grievance-portal/releases/$release/grievance-portal.war"
 unset FACTER_war_source
 export FACTER_gp_release="$release"
 if [ -n "${WAR_SOURCE:-}" ]; then
-  export FACTER_war_source="$WAR_SOURCE"
+  # Puppet only accepts absolute paths, so a path relative to the current folder is resolved here.
+  export FACTER_war_source="$(readlink -f "$WAR_SOURCE")"
 elif [ ! -f "$stored" ]; then
   export FACTER_war_source="$repo/target/grievance-portal.war"
 fi
