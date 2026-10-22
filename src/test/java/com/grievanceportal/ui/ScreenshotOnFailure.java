@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.opentest4j.TestAbortedException;
 
 /**
  * Saves a screenshot of the browser to target/screenshots whenever a test method fails.
@@ -18,6 +19,9 @@ public class ScreenshotOnFailure implements TestExecutionExceptionHandler {
 
     @Override
     public void handleTestExecutionException(ExtensionContext context, Throwable failure) throws Throwable {
+        if (failure instanceof TestAbortedException) {
+            throw failure; // a skipped test (failed assumption) is not a failure, so no screenshot
+        }
         Object test = context.getRequiredTestInstance();
         if (test instanceof UiTestBase) {
             UiTestBase base = (UiTestBase) test;
