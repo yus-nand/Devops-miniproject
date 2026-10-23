@@ -158,11 +158,12 @@ Settings are read from system properties, then environment variables:
 `ops/puppet/` holds the Puppet code that turns a clean Ubuntu 24.04 machine into a portal server: Java 17, Tomcat 10, a `tomcat`-owned data folder, the generated configuration files and the deployed WAR, served on port 8083. The specification it implements is `docs/07-server-specification.md`.
 
 ```bash
-sudo apt-get update && sudo apt-get install -y puppet-agent   # once per node
-ops/puppet/apply.sh --noop                                     # preview
-ops/puppet/apply.sh                                            # apply
+ops/puppet/provision.sh 1.0.0                  # bare node: installs Puppet, deploys release 1.0.0, checks health
+ops/puppet/deploy.sh 1.0.1 path/to/new.war     # new release; falls back to the stable one if it is unhealthy
 curl -s http://localhost:8083/grievance-portal/health
 ```
+
+Releases, the health check and the rollback are described in `docs/08-provisioning-and-rollback.md`.
 
 ## Documents
 
@@ -173,6 +174,7 @@ curl -s http://localhost:8083/grievance-portal/health
 - `docs/05-container-lifecycle.md`: the Docker container lifecycle, from the command log
 - `docs/06-continuous-deployment.md`: the commit-to-container flow of the Jenkins pipeline
 - `docs/07-server-specification.md`: what a server needs, as implemented by the Puppet code
+- `docs/08-provisioning-and-rollback.md`: provisioning from scratch, idempotency, health check and rollback, with logs
 
 ## Branching strategy
 

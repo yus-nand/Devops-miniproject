@@ -13,9 +13,13 @@ This page says what a server needs in order to run the Policyholder Grievance Po
 | Folder | `/var/lib/grievance-portal` | owner `tomcat:tomcat`, mode 0750 | Holds the H2 database files, so data lives outside the deployed application. |
 | Folder | `/etc/systemd/system/tomcat10.service.d` | owner `root`, mode 0755 | Holds the override that keeps the data folder writable. |
 | File | `/etc/default/tomcat10` | owner `root`, mode 0644 | `JAVA_HOME`, heap size, `GP_DB_PATH`, `GP_ENV_NAME`, security manager off. |
-| File | `/etc/tomcat10/server.xml` | owner `root:tomcat`, mode 0640 | Minimal connector configuration: HTTP port, no shutdown port. |
+| File | `/etc/tomcat10/server.xml` | owner `root:tomcat`, mode 0640 | Minimal connector configuration: HTTP port, no shutdown port, auto-deploy off (Puppet restarts Tomcat on a new WAR). |
 | File | `/etc/systemd/system/tomcat10.service.d/grievance-portal.conf` | owner `root`, mode 0644 | `ReadWritePaths=/var/lib/grievance-portal`, because the packaged unit makes the rest of the file system read-only. |
-| File | `/var/lib/tomcat10/webapps/grievance-portal.war` | owner `tomcat:tomcat`, mode 0640 | The release being deployed. Tomcat redeploys it by itself when the file changes. |
+| Folder | `/opt/grievance-portal/releases/<release>` | owner `root`, mode 0755 | Every release is stored here once and never replaced, which is what makes a rollback possible. |
+| File | `/opt/grievance-portal/releases/<release>/grievance-portal.war` | owner `root`, mode 0644 | The stored release. |
+| File | `/opt/grievance-portal/stable` | written by Puppet | Name of the last release that passed its health check. |
+| File | `/usr/local/bin/gp-healthcheck` | owner `root`, mode 0755 | Asks `/health` until it reports UP; used by Puppet after every deployment and by `deploy.sh`. |
+| File | `/var/lib/tomcat10/webapps/grievance-portal.war` | owner `tomcat:tomcat`, mode 0640 | A copy of the chosen release. A change removes the old unpacked application and restarts Tomcat. |
 | Port | 8083/tcp | listening, HTTP | 8080 is the Windows Tomcat, 8081 Jenkins, 8082 the Docker container and 5000 the registry. The shutdown port is switched off. |
 | Service | `tomcat10` | running, enabled at boot | Serves the application. |
 
@@ -33,7 +37,7 @@ These are the bootstrap steps that Puppet cannot do for itself:
 1. Ubuntu 24.04 with systemd as the init system (`ps -p 1 -o comm=` prints `systemd`).
 2. A user with `sudo`.
 3. `puppet-agent` installed: `sudo apt-get update && sudo apt-get install -y puppet-agent` (Puppet 8.4 from the Ubuntu repositories).
-4. The WAR built: `mvn package` writes `target/grievance-portal.war`.
+4. The WAR built: `mvn package` writes `target/grievance-portal.war`. `provision.sh` installs Puppet itself on a bare node.
 
 ## How the code is organised
 
@@ -41,21 +45,24 @@ These are the bootstrap steps that Puppet cannot do for itself:
 |---|---|
 | `ops/puppet/manifests/site.pp` | Entry point; hands the WAR location to the module. |
 | `ops/puppet/modules/grievance_portal/manifests/init.pp` | The class with every resource above, in dependency order: package index, Java, Tomcat, user, folders, files, WAR, service. |
-| `ops/puppet/modules/grievance_portal/templates/*.epp` | The three generated files. |
-| `ops/puppet/apply.sh` | Checks the syntax, then runs `puppet apply` and prints whether anything changed. |
+| `ops/puppet/modules/grievance_portal/templates/*.epp` | The four generated files (defaults, `server.xml`, systemd override, health-check script). |
+| `ops/puppet/apply.sh` | Checks the syntax, then runs `puppet apply` for a release and prints whether anything changed. |
+| `ops/puppet/deploy.sh`, `provision.sh`, `make-broken-war.sh` | Deploy with a health check and rollback, bootstrap a bare node, and build a faulty release for the demonstration; see `docs/08-provisioning-and-rollback.md`. |
 
 Class parameters (`http_port`, `env_name`, `data_dir`, heap sizes, Java package) have defaults in `init.pp`, so the specification above is the default configuration.
 
 ## How to run it
 
 ```bash
-ops/puppet/apply.sh --noop     # shows what would change, changes nothing
-ops/puppet/apply.sh            # applies it
+ops/puppet/provision.sh 1.0.0                     # bare node: install Puppet, deploy release 1.0.0, check health
+ops/puppet/deploy.sh 1.0.1 path/to/new.war        # new release; falls back to the stable one if it is unhealthy
 curl -s http://localhost:8083/grievance-portal/health
 ```
 
-A healthy result is `{"status":"UP","version":"1.0.0","environment":"puppet-node"}`. The first run installs and changes things, and `apply.sh` ends with "changes were applied". The same command run again ends with "no changes were needed", which is what the idempotency check in Task 14 relies on.
+`ops/puppet/apply.sh` runs only the Puppet step (`--noop` previews, but needs the release to be stored on the node already).
 
-## Not covered here
+A healthy result is `{"status":"UP","version":"1.0.0","environment":"puppet-node"}`. The first run installs and changes things and ends with "changes were applied". The same command run again ends with "no changes were needed", which is the idempotency check.
 
-Provisioning a node from scratch on demand, running the code a second time as proof of idempotency, the automatic health check and rolling back to an earlier WAR are the next task.
+## What the node is shown to do
+
+Provisioning from scratch, the second run that changes nothing, the health check and the rollback to the stable release are written up with their logs in `docs/08-provisioning-and-rollback.md`.
