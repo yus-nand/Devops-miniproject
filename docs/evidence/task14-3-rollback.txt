@@ -1,0 +1,44 @@
+===== state before: stable = 1.0.0
+{"status":"UP","version":"1.0.0","environment":"puppet-node"}
+===== deploy of the faulty release 1.0.1-broken: Thu Oct 22 23:24:51 UTC 2026 =====
+== Deploying release 1.0.1-broken (stable release before this run: 1.0.0)
+== Puppet 8.4.0, release 1.0.1-broken, WAR /mnt/c/Users/nandi/OneDrive/Desktop/Engineering/sem 7 (ignorance is bliss)/DevOps/mini project/Devops miniproject/target/grievance-portal-broken.war
+== Syntax check
+syntax ok
+== Apply
+Notice: Compiled catalog for msi in environment production in 0.28 seconds
+Notice: /Stage[main]/Grievance_portal/File[/opt/grievance-portal/releases/1.0.1-broken]/ensure: created
+Notice: /Stage[main]/Grievance_portal/File[/opt/grievance-portal/releases/1.0.1-broken/grievance-portal.war]/ensure: defined content as '{sha256}9883577e51c42b9afbaea68d6acb8867afe603e75a4675564d827dbb5519131a'
+Notice: /Stage[main]/Grievance_portal/File[/var/lib/tomcat10/webapps/grievance-portal.war]/content: content changed '{sha256}93930635bb3a9ac2b594ab4991e937b095cdb626d97ecaea00fcd5afe138fa5a' to '{sha256}9883577e51c42b9afbaea68d6acb8867afe603e75a4675564d827dbb5519131a'
+Notice: /Stage[main]/Grievance_portal/Exec[clear-unpacked-app]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Grievance_portal/Service[tomcat10]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Grievance_portal/Exec[health-check]/returns: health check FAILED after 20 attempts: <!doctype html><html lang="en"><head><title>HTTP Status 404 – Not Found</title><style type="text/css">body {font-family:Tahoma,Arial,sans-serif;} h1, h2, h3, b {color:white;background-color:#525D76;} h1 {font-size:22px;} h2 {font-size:16px;} h3 {font-size:14px;} p {font-size:12px;} a {color:black;} .line {height:1px;background-color:#525D76;border:none;}</style></head><body><h1>HTTP Status 404 – Not Found</h1><hr class="line" /><p><b>Type</b> Status Report</p><p><b>Message</b> The requested resource [&#47;grievance-portal&#47;health] is not available</p><p><b>Description</b> The origin server did not find a current representation for the target resource or is not willing to disclose that one exists.</p><hr class="line" /><h3>Apache Tomcat/10.1.55 (Ubuntu)</h3></body></html>
+Error: /Stage[main]/Grievance_portal/Exec[health-check]: Failed to call refresh: '/usr/local/bin/gp-healthcheck' returned 1 instead of one of [0]
+Error: /Stage[main]/Grievance_portal/Exec[health-check]: '/usr/local/bin/gp-healthcheck' returned 1 instead of one of [0]
+Notice: /Stage[main]/Grievance_portal/Exec[mark-stable]: Dependency Exec[health-check] has failures: true
+Warning: /Stage[main]/Grievance_portal/Exec[mark-stable]: Skipping because of failed dependencies
+Notice: Applied catalog in 57.96 seconds
+== Result: FAILED (exit code 6)
+== Release 1.0.1-broken FAILED: the Puppet run or the health check did not succeed
+== Rolling back to stable release 1.0.0
+== Puppet 8.4.0, release 1.0.0, WAR already stored on this node
+== Syntax check
+syntax ok
+== Apply
+Notice: Compiled catalog for msi in environment production in 0.27 seconds
+Notice: /Stage[main]/Grievance_portal/File[/var/lib/tomcat10/webapps/grievance-portal.war]/content: content changed '{sha256}9883577e51c42b9afbaea68d6acb8867afe603e75a4675564d827dbb5519131a' to '{sha256}93930635bb3a9ac2b594ab4991e937b095cdb626d97ecaea00fcd5afe138fa5a'
+Notice: /Stage[main]/Grievance_portal/Exec[clear-unpacked-app]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Grievance_portal/Service[tomcat10]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Grievance_portal/Exec[health-check]/returns: health check ok (attempt 2 of 20): {"status":"UP","version":"1.0.0","environment":"puppet-node"}
+Notice: /Stage[main]/Grievance_portal/Exec[health-check]: Triggered 'refresh' from 2 events
+Notice: Applied catalog in 4.64 seconds
+== Result: changes were applied
+health check ok (attempt 1 of 20): {"status":"UP","version":"1.0.0","environment":"puppet-node"}
+== Rolled back: release 1.0.0 is running and healthy again (release 1.0.1-broken was rejected)
+exit code: 3
+
+===== state after =====
+stable = 1.0.0
+1.0.0
+1.0.1-broken
+{"status":"UP","version":"1.0.0","environment":"puppet-node"}

@@ -1,0 +1,20 @@
+<%- | Integer $http_port,
+      Integer $health_attempts | -%>
+#!/usr/bin/env bash
+# Managed by Puppet (class grievance_portal). Changes made by hand are overwritten.
+# Succeeds when the portal answers "status":"UP". Usage: gp-healthcheck [attempts]; attempts are 3 s apart.
+url="http://localhost:<%= $http_port %>/grievance-portal/health"
+attempts="${1:-<%= $health_attempts %>}"
+body=""
+for i in $(seq 1 "$attempts"); do
+  body="$(curl -s --max-time 5 "$url" || true)"
+  case "$body" in
+    *'"status":"UP"'*)
+      echo "health check ok (attempt $i of $attempts): $body"
+      exit 0
+      ;;
+  esac
+  [ "$i" -lt "$attempts" ] && sleep 3
+done
+echo "health check FAILED after $attempts attempts: ${body:-no answer from $url}" >&2
+exit 1
