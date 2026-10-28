@@ -1,0 +1,22 @@
+# 1. Build the WAR from the project folder
+# 2. Point this PowerShell session at Tomcat (needed in each new window)
+# 3. Stop Tomcat, then wait a few seconds
+# 4. Remove the old deployment (the unpacked folder and the old WAR)
+# 5. Copy in the new WAR
+# 6. Start Tomcat
+
+cd "C:\Users\nandi\OneDrive\Desktop\Engineering\sem 7 (ignorance is bliss)\DevOps\mini project\Devops miniproject"
+mvn clean package
+
+
+$env:CATALINA_HOME = "C:\tools\apache-tomcat-10.1.61"
+& "$env:CATALINA_HOME\bin\shutdown.bat"
+Start-Sleep -Seconds 5
+Remove-Item "$env:CATALINA_HOME\webapps\grievance-portal*" -Recurse -Force
+Copy-Item target\grievance-portal.war "$env:CATALINA_HOME\webapps\"
+& "$env:CATALINA_HOME\bin\startup.bat"
+
+
+Jenkins: http://localhost:8081/job/grievance-portal-pipeline/
+
+yash4172
